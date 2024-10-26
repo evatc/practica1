@@ -12,7 +12,7 @@ abstract class ArbolHuffman {
       case HojaHuffman(letra, peso) => List(letra)
       case RamaHuffman(izq, dch) => izq.caracteres ++ dch.caracteres
 
-  def saber(bits: List[Bit], cadena: String): String = this match
+  /*def saber(bits: List[Bit], cadena: String): String = this match
     case HojaHuffman(letra, peso) => (cadena + letra,bits.tail)
     case RamaHuffman(izq,dch) if (bits.head == 1) => dch.saber(bits.tail, cadena + bits.head)
     case RamaHuffman(izq, dch) if (bits.head == 0) => izq.saber(bits.tail, cadena + bits.head)
@@ -26,7 +26,17 @@ abstract class ArbolHuffman {
         case RamaHuffman(izq, dch) if (bits.head == 0) => izq.saber(bits.tail, cadena + bits.head)
 
       }
-      dAux(bits,"")
+      dAux(bits,"")*/
+
+  def decodificar(bits: List[Bit]): String =
+    @tailrec
+    def dAux(bits: List[Bit], arbolHuffman: ArbolHuffman, cadenatemp: String): String = (bits, arbolHuffman) match
+      case (Nil, _) => cadenatemp
+      case (0 :: tail, RamaHuffman(izq, _)) => dAux(tail, izq, cadenatemp)
+      case (1 :: tail, RamaHuffman(_, dcha)) => dAux(tail, dcha, cadenatemp)
+      case (listabits, HojaHuffman(letra, n)) => dAux(listabits, this, cadenatemp + letra)
+
+    dAux(bits, this, "")
 }
 def cadenaAListaChars(cadena: String): List [Char] =
   @tailrec
