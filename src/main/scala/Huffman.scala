@@ -78,3 +78,4 @@ def main():Unit =
   println(Hojas.caracteres)
   println(cadenaAListaChars("Hola me llamo"))
   println(listaCharsACadena(List('h',' ', 'm', 'e')))
+  println(arbolHuffman.decodificar(List(0,1,0,0,1,1,1,1,1,0,0,1,1,0,1,1,1,1,0,0,1,0)))
