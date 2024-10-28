@@ -3,30 +3,17 @@ import scala.annotation.tailrec
 abstract class ArbolHuffman {
 
   type Bit = 0 | 1
+  // Devuelve el peso de un ArbolHuf.
   def peso: Int = this match
     case HojaHuffman(n, p) => p
     case RamaHuffman(izq, dch) => izq.peso + dch.peso
 
+  // Devuelve la lista de caracteres de un ArbolHuf
 
   def caracteres: List[Char] = this match
       case HojaHuffman(letra, peso) => List(letra)
       case RamaHuffman(izq, dch) => izq.caracteres ++ dch.caracteres
 
-  /*def saber(bits: List[Bit], cadena: String): String = this match
-    case HojaHuffman(letra, peso) => (cadena + letra,bits.tail)
-    case RamaHuffman(izq,dch) if (bits.head == 1) => dch.saber(bits.tail, cadena + bits.head)
-    case RamaHuffman(izq, dch) if (bits.head == 0) => izq.saber(bits.tail, cadena + bits.head)
-
-  def decodificar(bits: List[Bit]): String =
-    @tailrec
-    def dAux(bits: List[Bit], cadena: String, arbolHuffman: ArbolHuffman): String =
-      while(bits != null){
-        if (arbolHuffman == HojaHuffman(letra, peso)) => dAux(bits.tailcadena + letra
-        case RamaHuffman(izq, dch) if (bits.head == 1) => dch.saber(bits.tail, cadena + bits.head)
-        case RamaHuffman(izq, dch) if (bits.head == 0) => izq.saber(bits.tail, cadena + bits.head)
-
-      }
-      dAux(bits,"")*/
 
   def decodificar(bits: List[Bit]): String =
     @tailrec
@@ -53,19 +40,22 @@ abstract class ArbolHuffman {
       case (head::tail, RamaHuffman(nodoizq, nododch)) if nodoizq.contiene(head) => codificarAux(listachar, 0::listtemp, nodoizq)
       case (head::tail, RamaHuffman(nodoizq, nododch)) if nododch.contiene(head) => codificarAux(listachar, 1::listtemp, nododch)
     codificarAux(listachar, List(), this)
-
-  def listaCharsADistFrec(listaChar: List[Char]): List[(Char, Int)] =
-    @tailrec
-    def lAux(listaChar: List[Char], lista: List[(Char,Int)]): List[(Char,Int)] = listaChar match
-      case Nil => lista
-      case _ =>
-        val tupla: (Char,Int) = (listaChar.head,contar(listaChar,listaChar.head))
-        val listatemp: List[(Char,Int)]= List(tupla)
-        lAux(quitar(listaChar,listaChar.head), lista ++ listatemp)
-    lAux(listaChar,List())
 }
+// Convierte la lista de caracteres en distribución de frecuencias.
 
-def contar(lista: List[Char], char: Char): Int = //saber cuantas veces está un caracter dentro de una frase
+def listaCharsADistFrec(listaChar: List[Char]): List[(Char, Int)] =
+  @tailrec
+  def lAux(listaChar: List[Char], lista: List[(Char,Int)]): List[(Char,Int)] = listaChar match
+    case Nil => lista
+    case _ =>
+      val tupla: (Char,Int) = (listaChar.head,contar(listaChar,listaChar.head))
+      val listatemp: List[(Char,Int)]= List(tupla)
+      lAux(listaChar.filter( _ != listaChar.head), lista ++ listatemp)
+      //El filter lo hemos dado en teoria asi que supongo que se podra usar
+  lAux(listaChar,List())
+
+//saber cuantas veces está un caracter dentro de una frase
+def contar(lista: List[Char], char: Char): Int =
 
   @tailrec
   def cAux(lista: List[Char], n: Int, char: Char): Int = lista match
@@ -75,7 +65,7 @@ def contar(lista: List[Char], char: Char): Int = //saber cuantas veces está un 
 
   cAux(lista, 0, char)
 
-def quitar(lista: List[Char], char: Char): List[Char] = // devuelve la lista sin el carácter que ya se ha buscado
+/*def quitar(lista: List[Char], char: Char): List[Char] = // devuelve la lista sin el carácter que ya se ha buscado
   @tailrec
   def qAux(lista: List[Char], char: Char, listatemp: List[Char]): List[Char] = lista match
     case Nil => listatemp
@@ -83,7 +73,22 @@ def quitar(lista: List[Char], char: Char): List[Char] = // devuelve la lista sin
     case _ if ((lista.head == char) && (listatemp !=Nil)) => qAux(lista.tail, char,listatemp ++ lista.tail)
     case _ => qAux(lista.tail, char, listatemp)
 
-  qAux(lista, char, List())
+  qAux(lista, char, List())*/
+
+// Convierte la distribución en una lista de hojas ordenada
+def DistribFrecAListaHojas(frec:List[(Char, Int)]): List[HojaHuffman] =
+  @tailrec
+  def DistribFrecAListaHojasAux(frec:List[(Char, Int)], listtemp:List[HojaHuffman]): List[HojaHuffman] = frec match
+    case Nil => listtemp.ordenar
+    case (caracter, peso)::tail => DistribFrecAListaHojasAux(tail, HojaHuffman(caracter, peso)::listtemp)
+  DistribFrecAListaHojasAux(frec, List())
+
+  def ordenar(lista: List[HojaHuffman]): List[HojaHuffman] =
+    @tailrec
+    def ordenarAux(lista: List[HojaHuffman], listtemp: List[HojaHuffman]): List[HojaHuffman] = lista match
+
+
+
 def cadenaAListaChars(cadena: String): List [Char] =
   @tailrec
   def cAux(cadena: String, l: List[Char]): List[Char] = cadena match
@@ -105,7 +110,7 @@ case class RamaHuffman(nodoizq: ArbolHuffman, nododch: ArbolHuffman) extends Arb
 
 }
 
-case class HojaHuffman(letra: Char, p: Int) extends ArbolHuffman{
+case class HojaHuffman(caracter: Char, p: Int) extends ArbolHuffman{
 
 }
 
@@ -124,8 +129,9 @@ def main():Unit =
   println(Hojas.caracteres)
   println(cadenaAListaChars("Hola me llamo"))
   println(listaCharsACadena(List('h',' ', 'm', 'e')))
-  println(arbolHuffman.decodificar(List(0,1,0,0,1,1,1,1,1,0,0,1,1,0,1,1,1,1,0,0,1,0)))
+  println(arbolHuffman.decodificar(List(0,1,0,0,1,1,1,1,1,0,0,1,0)))
   println(arbolHuffman.contiene('s'))
   println(arbolHuffman.contiene('p'))
-  println(arbolHuffman.codificar("sos "))
-  println(arbolHuffman.listaCharsADistFrec(List('h',' ', 'm', 'e', 'h')))
+  println(arbolHuffman.codificar("sos eso"))
+  println(listaCharsADistFrec(List('h',' ', 'm', 'e', 'h')))
+  println(DistribFrecAListaHojas(List(('h',2), (' ',3), ('m',1), ('e',1))))
