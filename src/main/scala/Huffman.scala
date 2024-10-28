@@ -30,13 +30,30 @@ abstract class ArbolHuffman {
 
   def decodificar(bits: List[Bit]): String =
     @tailrec
-    def dAux(bits: List[Bit], arbolHuffman: ArbolHuffman, cadenatemp: String): String = (bits, arbolHuffman) match
+    def decodificarAux(bits: List[Bit], arbol: ArbolHuffman, cadenatemp: String): String = (bits, arbol) match
       case (Nil, _) => cadenatemp
-      case (0 :: tail, RamaHuffman(izq, _)) => dAux(tail, izq, cadenatemp)
-      case (1 :: tail, RamaHuffman(_, dcha)) => dAux(tail, dcha, cadenatemp)
-      case (listabits, HojaHuffman(letra, n)) => dAux(listabits, this, cadenatemp + letra)
+      case (0 :: tail, RamaHuffman(izq, _)) => decodificarAux(tail, izq, cadenatemp)
+      case (1 :: tail, RamaHuffman(_, dcha)) => decodificarAux(tail, dcha, cadenatemp)
+      case (listabits, HojaHuffman(letra, n)) => decodificarAux(listabits, this, cadenatemp + letra)
 
-    dAux(bits, this, "")
+    decodificarAux(bits, this, "")
+
+  def contiene(caracter: Char): Boolean =
+    def contieneAux(arbol: ArbolHuffman, caracter: Char): Boolean = arbol match
+      case HojaHuffman(letra, p) => letra == caracter
+      case RamaHuffman(nodoizq, nododch) => contieneAux(nodoizq, caracter) || contieneAux(nododch, caracter)
+    contieneAux(this, caracter)
+
+  def codificar(cadena: String): List[Bit]=
+    val listachar: List[Char] = cadenaAListaChars(cadena)
+    @tailrec
+    def codificarAux(listachar: List[Char], listtemp: List[Bit], arbol: ArbolHuffman): List[Bit] = (listachar, arbol) match
+      case (Nil, _) => listtemp.reverse
+      case (head::tail, HojaHuffman(letra, p)) => codificarAux(tail, listtemp, arbol)
+      case (head::tail, RamaHuffman(nodoizq, nododch)) if nodoizq.contiene(head) => codificarAux(tail, 0::listtemp, nodoizq)
+      case (head::tail, RamaHuffman(nodoizq, nododch)) if nododch.contiene(head) => codificarAux(tail, 1::listtemp, nododch)
+    codificarAux(listachar, List(), this)
+
 }
 def cadenaAListaChars(cadena: String): List [Char] =
   @tailrec
@@ -79,3 +96,6 @@ def main():Unit =
   println(cadenaAListaChars("Hola me llamo"))
   println(listaCharsACadena(List('h',' ', 'm', 'e')))
   println(arbolHuffman.decodificar(List(0,1,0,0,1,1,1,1,1,0,0,1,1,0,1,1,1,1,0,0,1,0)))
+  println(arbolHuffman.contiene('s'))
+  println(arbolHuffman.contiene('p'))
+  println(arbolHuffman.codificar("sos "))
