@@ -49,12 +49,41 @@ abstract class ArbolHuffman {
     @tailrec
     def codificarAux(listachar: List[Char], listtemp: List[Bit], arbol: ArbolHuffman): List[Bit] = (listachar, arbol) match
       case (Nil, _) => listtemp.reverse
-      case (head::tail, HojaHuffman(letra, p)) => codificarAux(tail, listtemp, arbol)
-      case (head::tail, RamaHuffman(nodoizq, nododch)) if nodoizq.contiene(head) => codificarAux(tail, 0::listtemp, nodoizq)
-      case (head::tail, RamaHuffman(nodoizq, nododch)) if nododch.contiene(head) => codificarAux(tail, 1::listtemp, nododch)
+      case (head::tail, HojaHuffman(letra, _)) if (head == letra)=> codificarAux(tail, listtemp, this)
+      case (head::tail, RamaHuffman(nodoizq, nododch)) if nodoizq.contiene(head) => codificarAux(listachar, 0::listtemp, nodoizq)
+      case (head::tail, RamaHuffman(nodoizq, nododch)) if nododch.contiene(head) => codificarAux(listachar, 1::listtemp, nododch)
     codificarAux(listachar, List(), this)
 
+  def listaCharsADistFrec(listaChar: List[Char]): List[(Char, Int)] =
+    @tailrec
+    def lAux(listaChar: List[Char], lista: List[(Char,Int)]): List[(Char,Int)] = listaChar match
+      case Nil => lista
+      case _ =>
+        val tupla: (Char,Int) = (listaChar.head,contar(listaChar,listaChar.head))
+        val listatemp: List[(Char,Int)]= List(tupla)
+        lAux(quitar(listaChar,listaChar.head), lista ++ listatemp)
+    lAux(listaChar,List())
 }
+
+def contar(lista: List[Char], char: Char): Int = //saber cuantas veces está un caracter dentro de una frase
+
+  @tailrec
+  def cAux(lista: List[Char], n: Int, char: Char): Int = lista match
+    case Nil => n
+    case _ if (lista.head == char) => cAux(lista.tail, n + 1, char)
+    case _ => cAux(lista.tail, n, char)
+
+  cAux(lista, 0, char)
+
+def quitar(lista: List[Char], char: Char): List[Char] = // devuelve la lista sin el carácter que ya se ha buscado
+  @tailrec
+  def qAux(lista: List[Char], char: Char, listatemp: List[Char]): List[Char] = lista match
+    case Nil => listatemp
+    case _ if ((lista.head == char) && (listatemp !=Nil)) => qAux(lista.tail, char,listatemp.init ++ lista.tail)
+    case _ if ((lista.head == char) && (listatemp !=Nil)) => qAux(lista.tail, char,listatemp ++ lista.tail)
+    case _ => qAux(lista.tail, char, listatemp)
+
+  qAux(lista, char, List())
 def cadenaAListaChars(cadena: String): List [Char] =
   @tailrec
   def cAux(cadena: String, l: List[Char]): List[Char] = cadena match
@@ -99,3 +128,4 @@ def main():Unit =
   println(arbolHuffman.contiene('s'))
   println(arbolHuffman.contiene('p'))
   println(arbolHuffman.codificar("sos "))
+  println(arbolHuffman.listaCharsADistFrec(List('h',' ', 'm', 'e', 'h')))
