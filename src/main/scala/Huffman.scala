@@ -76,7 +76,7 @@ def contar(lista: List[Char], char: Char): Int =
   qAux(lista, char, List())*/
 
 // Convierte la distribución en una lista de hojas ordenada
-def DistribFrecAListaHojas(frec:List[(Char, Int)]): List[HojaHuffman] =
+/*def DistribFrecAListaHojas(frec:List[(Char, Int)]): List[HojaHuffman] =
   @tailrec
   def DistribFrecAListaHojasAux(frec:List[(Char, Int)], listtemp:List[HojaHuffman]): List[HojaHuffman] = frec match
     case Nil => listtemp.ordenar
@@ -86,7 +86,7 @@ def DistribFrecAListaHojas(frec:List[(Char, Int)]): List[HojaHuffman] =
   def ordenar(lista: List[HojaHuffman]): List[HojaHuffman] =
     @tailrec
     def ordenarAux(lista: List[HojaHuffman], listtemp: List[HojaHuffman]): List[HojaHuffman] = lista match
-
+*/
 
 
 def cadenaAListaChars(cadena: String): List [Char] =
@@ -133,5 +133,5 @@ def main():Unit =
   println(arbolHuffman.contiene('s'))
   println(arbolHuffman.contiene('p'))
   println(arbolHuffman.codificar("sos eso"))
-  println(listaCharsADistFrec(List('h',' ', 'm', 'e', 'h')))
-  println(DistribFrecAListaHojas(List(('h',2), (' ',3), ('m',1), ('e',1))))
+  println(listaCharsADistFrec(List('h',' ',' ','m','h', 'e', 'h')))
+  //println(DistribFrecAListaHojas(List(('h',2), (' ',3), ('m',1), ('e',1))))
