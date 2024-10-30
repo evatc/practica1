@@ -50,7 +50,7 @@ abstract class ArbolHuffman {
     lista.length == 1
 
   def combinar(nodos: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
-    case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail).sortBy(_.peso)
+    case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail)
     case _ => nodos
 
   def repetirHasta(combinar: List[ArbolHuffman] => List[ArbolHuffman], esListaSingleton: List[ArbolHuffman] => Boolean)(listaHojas: List[ArbolHuffman]): ArbolHuffman =
