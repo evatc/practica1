@@ -54,8 +54,10 @@ abstract class ArbolHuffman {
     @tailrec
     def combinarAux(nodos: List[ArbolHuffman], lista: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
       case Nil => lista
-      
-
+      case _ =>
+        val n1: ArbolHuffman = nodos.head
+        val n2: ArbolHuffman = nodos(1)
+        creaRamaHuff(n1, n2)
 }
 // Convierte la lista de caracteres en distribución de frecuencias.
 
