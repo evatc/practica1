@@ -43,21 +43,37 @@ abstract class ArbolHuffman {
 
   // Crea un objeto RamaHuff integrando los dos ArbolHuff (izquierdo y
   // derecho)que se le pasan como parámetros
-  def creaRamaHuff(izq: ArbolHuffman, dch: ArbolHuffman): RamaHuffman =
+  /*def creaRamaHuff(izq: ArbolHuffman, dch: ArbolHuffman): RamaHuffman =
     RamaHuffman(izq, dch)
 
   def esListaSingleton(lista: List[ArbolHuffman]): Boolean =
     lista.length == 1
 
   def combinar(nodos: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
-    case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail)
+    case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail).sortBy(_.peso)
     case _ => nodos
 
   def repetirHasta(combinar: List[ArbolHuffman] => List[ArbolHuffman], esListaSingleton: List[ArbolHuffman] => Boolean)(listaHojas: List[ArbolHuffman]): ArbolHuffman =
     if esListaSingleton(listaHojas) then listaHojas.head
-    else repetirHasta(combinar, esListaSingleton)(combinar(listaHojas))
+    else repetirHasta(combinar, esListaSingleton)(combinar(listaHojas))*/
 
 }
+// Crea un objeto RamaHuff integrando los dos ArbolHuff (izquierdo y
+// derecho)que se le pasan como parámetros
+def creaRamaHuff(izq: ArbolHuffman, dch: ArbolHuffman): RamaHuffman =
+  RamaHuffman(izq, dch)
+
+def esListaSingleton(lista: List[ArbolHuffman]): Boolean =
+  lista.length == 1
+
+def combinar(nodos: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
+  case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail).sortBy(_.peso)
+  case _ => nodos
+
+def repetirHasta(combinar: List[ArbolHuffman] => List[ArbolHuffman], esListaSingleton: List[ArbolHuffman] => Boolean)(listaHojas: List[ArbolHuffman]): ArbolHuffman =
+  if esListaSingleton(listaHojas) then listaHojas.head
+  else repetirHasta(combinar, esListaSingleton)(combinar(listaHojas))
+  
 // Convierte la lista de caracteres en distribución de frecuencias.
 def listaCharsADistFrec(listaChar: List[Char]): List[(Char, Int)] =
   @tailrec
@@ -154,5 +170,7 @@ def main():Unit =
   println(arbolHuffman.codificar("sos eso"))
   println(listaCharsADistFrec(List('h',' ',' ','m','h', 'e', 'h')))
   println(DistribFrecAListaHojas(List(('h',5), (' ',3), ('m',1), ('e',2), ('t',4))))
-  println(arbolHuffman.esListaSingleton(List(arbolHuffman)))
-  println(arbolHuffman.esListaSingleton(List(arbolHuffman, arbolHuffman)))
+  println(esListaSingleton(List(arbolHuffman)))
+  println(esListaSingleton(List(arbolHuffman, arbolHuffman)))
+  val listaHojas = List(HojaHuffman('s',4), HojaHuffman('o',3), HojaHuffman('e',2), HojaHuffman(' ', 2))
+  println(repetirHasta(combinar, esListaSingleton)(listaHojas))
