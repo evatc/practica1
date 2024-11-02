@@ -141,6 +141,15 @@ def listaCharsACadena(listaCar: List[Char]): String =
 
   lAux(lista, "")
 
+def crearArbolHuffman(cadena: String): ArbolHuffman = cadena match
+  case null => 
+  
+
+object ArbolHuffman
+
+//constructor para clases abstractas
+def apply(cadena: String): ArbolHuffman = crearArbolHuffman(cadena)
+
 case class RamaHuffman(nodoizq: ArbolHuffman, nododch: ArbolHuffman) extends ArbolHuffman{
 
 }
@@ -172,5 +181,5 @@ def main():Unit =
   println(DistribFrecAListaHojas(List(('h',5), (' ',3), ('m',1), ('e',2), ('t',4))))
   println(esListaSingleton(List(arbolHuffman)))
   println(esListaSingleton(List(arbolHuffman, arbolHuffman)))
-  val listaHojas = List(HojaHuffman('s',4), HojaHuffman('o',3), HojaHuffman('e',2), HojaHuffman(' ', 2))
+  val listaHojas = List(HojaHuffman('s',2), HojaHuffman('o',2), HojaHuffman('e',3), HojaHuffman(' ', 4))
   println(repetirHasta(combinar, esListaSingleton)(listaHojas))
