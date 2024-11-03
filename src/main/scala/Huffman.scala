@@ -1,8 +1,9 @@
 import scala.annotation.tailrec
 
-abstract class ArbolHuffman {
 
-  type Bit = 0 | 1
+type Bit = 0 | 1
+type TablaCodigos = List[(Char, List[Bit])]
+abstract class ArbolHuffman {
 
   // Devuelve el peso de un ArbolHuf.
   def peso: Int = this match
@@ -18,6 +19,7 @@ abstract class ArbolHuffman {
   def decodificar(bits: List[Bit]): String =
     @tailrec
     def decodificarAux(bits: List[Bit], arbol: ArbolHuffman, cadenatemp: String): String = (bits, arbol) match
+      case (Nil, HojaHuffman(letra, n)) => cadenatemp + letra
       case (Nil, _) => cadenatemp
       case (0 :: tail, RamaHuffman(izq, _)) => decodificarAux(tail, izq, cadenatemp)
       case (1 :: tail, RamaHuffman(_, dcha)) => decodificarAux(tail, dcha, cadenatemp)
@@ -34,29 +36,12 @@ abstract class ArbolHuffman {
   def codificar(cadena: String): List[Bit]=
     val listachar: List[Char] = cadenaAListaChars(cadena)
     @tailrec
-    def codificarAux(listachar: List[Char], listtemp: List[Bit], arbol: ArbolHuffman): List[Bit] = (listachar, arbol) match
+    def codificarAux(listachar: List[Char], listtemp: List[Bit], arbol: ArbolHuffman): List[Bit] =  (listachar, arbol) match
       case (Nil, _) => listtemp.reverse
       case (head::tail, HojaHuffman(letra, _)) if (head == letra)=> codificarAux(tail, listtemp, this)
       case (head::tail, RamaHuffman(nodoizq, nododch)) if nodoizq.contiene(head) => codificarAux(listachar, 0::listtemp, nodoizq)
       case (head::tail, RamaHuffman(nodoizq, nododch)) if nododch.contiene(head) => codificarAux(listachar, 1::listtemp, nododch)
     codificarAux(listachar, List(), this)
-
-  // Crea un objeto RamaHuff integrando los dos ArbolHuff (izquierdo y
-  // derecho)que se le pasan como parámetros
-  /*def creaRamaHuff(izq: ArbolHuffman, dch: ArbolHuffman): RamaHuffman =
-    RamaHuffman(izq, dch)
-
-  def esListaSingleton(lista: List[ArbolHuffman]): Boolean =
-    lista.length == 1
-
-  def combinar(nodos: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
-    case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail).sortBy(_.peso)
-    case _ => nodos
-
-  def repetirHasta(combinar: List[ArbolHuffman] => List[ArbolHuffman], esListaSingleton: List[ArbolHuffman] => Boolean)(listaHojas: List[ArbolHuffman]): ArbolHuffman =
-    if esListaSingleton(listaHojas) then listaHojas.head
-    else repetirHasta(combinar, esListaSingleton)(combinar(listaHojas))*/
-
 }
 // Crea un objeto RamaHuff integrando los dos ArbolHuff (izquierdo y
 // derecho)que se le pasan como parámetros
@@ -102,7 +87,7 @@ def DistribFrecAListaHojas(frec:List[(Char, Int)]): List[HojaHuffman] =
   @tailrec
   def DistribFrecAListaHojasAux(frec:List[(Char, Int)], listtemp:List[HojaHuffman]): List[HojaHuffman] = frec match
     case Nil => ordenar(listtemp)
-    case (caracter, peso)::tail => DistribFrecAListaHojasAux(tail, HojaHuffman(caracter, peso)::listtemp)
+    case (letra, peso)::tail => DistribFrecAListaHojasAux(tail, HojaHuffman(letra, peso)::listtemp)
   DistribFrecAListaHojasAux(frec, List())
 
 def ordenar(lista: List[HojaHuffman]): List[HojaHuffman] =
@@ -115,6 +100,8 @@ def ordenar(lista: List[HojaHuffman]): List[HojaHuffman] =
     case _ => ordenarAux(lista.tail, insertar(lista.head, listtemp, List()))
 
   ordenarAux(lista, List())
+
+
 
 def insertar(h:HojaHuffman, lista: List[HojaHuffman], listtemp: List[HojaHuffman]): List[HojaHuffman] = lista match
   case Nil => listtemp
@@ -141,20 +128,40 @@ def listaCharsACadena(listaCar: List[Char]): String =
 
   lAux(lista, "")
 
-def crearArbolHuffman(cadena: String): ArbolHuffman = cadena match
-  case null => 
+def crearArbolHuffman(cadena: String): ArbolHuffman =
+  val listaHojas: List[HojaHuffman] = DistribFrecAListaHojas(listaCharsADistFrec(cadenaAListaChars(cadena)))
+  repetirHasta(combinar, esListaSingleton)(listaHojas)
   
 
 object ArbolHuffman
-
 //constructor para clases abstractas
-def apply(cadena: String): ArbolHuffman = crearArbolHuffman(cadena)
+  def apply(cadena: String): ArbolHuffman = crearArbolHuffman(cadena)
+  def deArbolATabla(arbol: ArbolHuffman): TablaCodigos =
+    def deArbolATablaAux(arbol: ArbolHuffman, listabits: List[Bit]): TablaCodigos = arbol match
+      case HojaHuffman(letra,_) => List((letra, listabits.reverse))
+      case RamaHuffman(izq, dcha) => deArbolATablaAux(izq, 0::listabits)++deArbolATablaAux(dcha, 1::listabits)
+    deArbolATablaAux(arbol,List())
+
+  def codificar(arbol: TablaCodigos)(cadena: String): List[Bit]=
+    val listachars = cadenaAListaChars(cadena)
+    def contiene(caracter: Char): List[Bit] =
+      def contieneAux(arbol: TablaCodigos, caracter: Char): List[Bit] = arbol match
+        case (char, listabits)::_ if char==caracter => listabits.reverse
+        case (char, listabits)::tail if char != caracter => contieneAux(tail,caracter)
+        case Nil => Nil
+      contieneAux(arbol, caracter)
+
+    def codificarAux (arbol: TablaCodigos, listabits: List[Bit])(cadena: List[Char]): List[Bit]= cadena match
+      case Nil => listabits.reverse
+      case head::tail => codificarAux(arbol,contiene(head)++listabits)(tail)
+    codificarAux(arbol,List())(listachars)
+
 
 case class RamaHuffman(nodoizq: ArbolHuffman, nododch: ArbolHuffman) extends ArbolHuffman{
 
 }
 
-case class HojaHuffman(caracter: Char, p: Int) extends ArbolHuffman{
+case class HojaHuffman(letra: Char, p: Int) extends ArbolHuffman{
 
 }
 
@@ -181,5 +188,13 @@ def main():Unit =
   println(DistribFrecAListaHojas(List(('h',5), (' ',3), ('m',1), ('e',2), ('t',4))))
   println(esListaSingleton(List(arbolHuffman)))
   println(esListaSingleton(List(arbolHuffman, arbolHuffman)))
-  val listaHojas = List(HojaHuffman('s',2), HojaHuffman('o',2), HojaHuffman('e',3), HojaHuffman(' ', 4))
+  val listaHojas = List(HojaHuffman('s',4), HojaHuffman('o',3), HojaHuffman('e',2), HojaHuffman(' ', 2))
   println(repetirHasta(combinar, esListaSingleton)(listaHojas))
+  println(crearArbolHuffman("this is an example of a huffman tree"))
+  println(deArbolATabla(arbolHuffman))
+  val tabla = deArbolATabla(arbolHuffman)
+  val mensaje = "sos eso"
+  println(codificar(tabla)(mensaje))
+
+
+
