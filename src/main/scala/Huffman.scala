@@ -51,9 +51,18 @@ def creaRamaHuff(izq: ArbolHuffman, dch: ArbolHuffman): RamaHuffman =
 def esListaSingleton(lista: List[ArbolHuffman]): Boolean =
   lista.length == 1
 
+def ordenarpeso(lista:List[ArbolHuffman]): List[ArbolHuffman] =
+  @tailrec
+  def ordenarpAux(lista:List[ArbolHuffman], acumulador: List[ArbolHuffman]): List[ArbolHuffman] = lista match
+    case Nil => acumulador
+    case _ if (lista.head.peso > acumulador.head.peso) => ordenarpAux(lista.tail,acumulador :+ lista.head)
+    case _ => ordenarpAux(lista.tail, lista.head :: acumulador)
+  ordenarpAux(lista.tail,List(lista.head))
+
+
 def combinar(nodos: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
-  case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail).sortBy(_.peso)
-  case _ => nodos
+  case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail)
+  case _ => ordenarpeso(nodos)
 
 def repetirHasta(combinar: List[ArbolHuffman] => List[ArbolHuffman], esListaSingleton: List[ArbolHuffman] => Boolean)(listaHojas: List[ArbolHuffman]): ArbolHuffman =
   if esListaSingleton(listaHojas) then listaHojas.head
@@ -189,7 +198,7 @@ def main():Unit =
   println(esListaSingleton(List(arbolHuffman)))
   println(esListaSingleton(List(arbolHuffman, arbolHuffman)))
   val listaHojas = List(HojaHuffman('s',4), HojaHuffman('o',3), HojaHuffman('e',2), HojaHuffman(' ', 2))
-  println(repetirHasta(combinar, esListaSingleton)(listaHojas))
+  println(repetirHasta(combinar, esListaSingleton)(ordenar(listaHojas)))
   println(crearArbolHuffman("this is an example of a huffman tree"))
   println(deArbolATabla(arbolHuffman))
   val tabla = deArbolATabla(arbolHuffman)
