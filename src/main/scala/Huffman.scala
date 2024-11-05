@@ -42,6 +42,7 @@ abstract class ArbolHuffman {
       case (head::tail, RamaHuffman(nodoizq, nododch)) if nodoizq.contiene(head) => codificarAux(listachar, 0::listtemp, nodoizq)
       case (head::tail, RamaHuffman(nodoizq, nododch)) if nododch.contiene(head) => codificarAux(listachar, 1::listtemp, nododch)
     codificarAux(listachar, List(), this)
+  
 }
 // Crea un objeto RamaHuff integrando los dos ArbolHuff (izquierdo y
 // derecho)que se le pasan como parámetros
@@ -51,18 +52,18 @@ def creaRamaHuff(izq: ArbolHuffman, dch: ArbolHuffman): RamaHuffman =
 def esListaSingleton(lista: List[ArbolHuffman]): Boolean =
   lista.length == 1
 
-def ordenarpeso(lista:List[ArbolHuffman]): List[ArbolHuffman] =
-  @tailrec
-  def ordenarpAux(lista:List[ArbolHuffman], acumulador: List[ArbolHuffman]): List[ArbolHuffman] = lista match
-    case Nil => acumulador
-    case _ if (lista.head.peso > acumulador.head.peso) => ordenarpAux(lista.tail,acumulador :+ lista.head)
-    case _ => ordenarpAux(lista.tail, lista.head :: acumulador)
-  ordenarpAux(lista.tail,List(lista.head))
-
 
 def combinar(nodos: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
   case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail)
   case _ => ordenarpeso(nodos)
+  def ordenarpeso(lista: List[ArbolHuffman]): List[ArbolHuffman] =
+    @tailrec
+    def ordenarpAux(lista: List[ArbolHuffman], acumulador: List[ArbolHuffman]): List[ArbolHuffman] = lista match
+      case Nil => acumulador
+      case _ if (lista.head.peso > acumulador.head.peso) => ordenarpAux(lista.tail, acumulador :+ lista.head)
+      case _ => ordenarpAux(lista.tail, lista.head :: acumulador)
+
+    ordenarpAux(lista.tail, List(lista.head))
 
 def repetirHasta(combinar: List[ArbolHuffman] => List[ArbolHuffman], esListaSingleton: List[ArbolHuffman] => Boolean)(listaHojas: List[ArbolHuffman]): ArbolHuffman =
   if esListaSingleton(listaHojas) then listaHojas.head
@@ -70,6 +71,16 @@ def repetirHasta(combinar: List[ArbolHuffman] => List[ArbolHuffman], esListaSing
   
 // Convierte la lista de caracteres en distribución de frecuencias.
 def listaCharsADistFrec(listaChar: List[Char]): List[(Char, Int)] =
+
+  //saber cuantas veces está un caracter dentro de una frase
+  def contar(lista: List[Char], char: Char): Int =
+    @tailrec
+    def cAux(lista: List[Char], n: Int, char: Char): Int = lista match
+      case Nil => n
+      case _ if (lista.head == char) => cAux(lista.tail, n + 1, char)
+      case _ => cAux(lista.tail, n, char)
+
+    cAux(lista, 0, char)
   @tailrec
   def lAux(listaChar: List[Char], lista: List[(Char,Int)]): List[(Char,Int)] = listaChar match
     case Nil => lista
@@ -80,16 +91,6 @@ def listaCharsADistFrec(listaChar: List[Char]): List[(Char, Int)] =
       //El filter lo hemos dado en teoria asi que supongo que se podra usar
   lAux(listaChar,List())
 
-//saber cuantas veces está un caracter dentro de una frase
-def contar(lista: List[Char], char: Char): Int =
-
-  @tailrec
-  def cAux(lista: List[Char], n: Int, char: Char): Int = lista match
-    case Nil => n
-    case _ if (lista.head == char) => cAux(lista.tail, n + 1, char)
-    case _ => cAux(lista.tail, n, char)
-
-  cAux(lista, 0, char)
 
 // Convierte la distribución en una lista de hojas ordenada
 def DistribFrecAListaHojas(frec:List[(Char, Int)]): List[HojaHuffman] =
@@ -100,6 +101,13 @@ def DistribFrecAListaHojas(frec:List[(Char, Int)]): List[HojaHuffman] =
   DistribFrecAListaHojasAux(frec, List())
 
 def ordenar(lista: List[HojaHuffman]): List[HojaHuffman] =
+  
+  def insertar(h: HojaHuffman, lista: List[HojaHuffman], listtemp: List[HojaHuffman]): List[HojaHuffman] = lista match
+    case Nil => listtemp
+    case _ if (h.peso < lista.head.peso) =>
+      val l: List[HojaHuffman] = listtemp :+ h
+      l ++ lista
+    case _ => insertar(h, lista.tail, listtemp :+ lista.head)
   @tailrec
   def ordenarAux(lista: List[HojaHuffman], listtemp: List[HojaHuffman]): List[HojaHuffman] = lista match
     case Nil => listtemp
@@ -109,16 +117,7 @@ def ordenar(lista: List[HojaHuffman]): List[HojaHuffman] =
     case _ => ordenarAux(lista.tail, insertar(lista.head, listtemp, List()))
 
   ordenarAux(lista, List())
-
-
-
-def insertar(h:HojaHuffman, lista: List[HojaHuffman], listtemp: List[HojaHuffman]): List[HojaHuffman] = lista match
-  case Nil => listtemp
-  case _ if (h.peso<lista.head.peso) =>
-    val l: List[HojaHuffman] = listtemp :+ h
-    l ++ lista
-  case _ => insertar(h,lista.tail, listtemp :+ lista.head)
-
+  
 
 def cadenaAListaChars(cadena: String): List [Char] =
   @tailrec
