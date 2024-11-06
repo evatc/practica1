@@ -164,6 +164,10 @@ object ArbolHuffman
       case head::tail => codificarAux(arbol,contiene(head)++listabits)(tail)
     codificarAux(arbol,List())(listachars)
 
+  def decodificar(tabla: TablaCodigos)(listabits: List[Bit]): String =
+
+
+
 
 case class RamaHuffman(nodoizq: ArbolHuffman, nododch: ArbolHuffman) extends ArbolHuffman{
 
@@ -202,7 +206,10 @@ def main():Unit =
   println(deArbolATabla(arbolHuffman))
   val tabla = deArbolATabla(arbolHuffman)
   val mensaje = "sos eso"
+  val miArbol = crearArbolHuffman("texto para construir el arbol huffman")
   println(codificar(tabla)(mensaje))
+
+
 
 
 
