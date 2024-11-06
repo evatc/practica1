@@ -7,15 +7,15 @@ abstract class ArbolHuffman {
 
   // Devuelve el peso de un ArbolHuf.
   def peso: Int = this match
-    case HojaHuffman(n, p) => p
-    case RamaHuffman(izq, dch) => izq.peso + dch.peso
+    case HojaHuffman(n, p) => p // te devuelve el peso de la hoja
+    case RamaHuffman(izq, dch) => izq.peso + dch.peso // te suma el peso de la rama de la izquierda y de la rama de la derecha
 
   // Devuelve la lista de caracteres de un ArbolHuf
   def caracteres: List[Char] = this match
       case HojaHuffman(letra, peso) => List(letra)
       case RamaHuffman(izq, dch) => izq.caracteres ++ dch.caracteres
 
-
+  //devuelve la cadena que se forma con la lista que han metido de bits
   def decodificar(bits: List[Bit]): String =
     @tailrec
     def decodificarAux(bits: List[Bit], arbol: ArbolHuffman, cadenatemp: String): String = (bits, arbol) match
@@ -27,12 +27,14 @@ abstract class ArbolHuffman {
 
     decodificarAux(bits, this, "")
 
+  //te dice si el carácter que estás buscando está en el árbol
   def contiene(caracter: Char): Boolean =
     def contieneAux(arbol: ArbolHuffman, caracter: Char): Boolean = arbol match
       case HojaHuffman(letra, p) => letra == caracter
       case RamaHuffman(nodoizq, nododch) => contieneAux(nodoizq, caracter) || contieneAux(nododch, caracter)
     contieneAux(this, caracter)
 
+  //devuelve la lista de bits q se forma con el string que metes
   def codificar(cadena: String): List[Bit]=
     val listachar: List[Char] = cadenaAListaChars(cadena)
     @tailrec
@@ -44,18 +46,19 @@ abstract class ArbolHuffman {
     codificarAux(listachar, List(), this)
   
 }
-// Crea un objeto RamaHuff integrando los dos ArbolHuff (izquierdo y
-// derecho)que se le pasan como parámetros
+// Crea un objeto RamaHuff integrando los dos ArbolHuff (izquierdo y derecho) que se le pasan como parámetros
 def creaRamaHuff(izq: ArbolHuffman, dch: ArbolHuffman): RamaHuffman =
   RamaHuffman(izq, dch)
 
+//te devuelve verdadero si la lista es igual a uno
 def esListaSingleton(lista: List[ArbolHuffman]): Boolean =
   lista.length == 1
 
-
+//te te va creando las ramas en función del peso que tienen las hojas
 def combinar(nodos: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
   case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail)
   case _ => ordenarpeso(nodos)
+  //te deja la lista ordenada por pesos para poder seguir creando ramas siguendo las normas del ArbolHuffman
   def ordenarpeso(lista: List[ArbolHuffman]): List[ArbolHuffman] =
     @tailrec
     def ordenarpAux(lista: List[ArbolHuffman], acumulador: List[ArbolHuffman]): List[ArbolHuffman] = lista match
@@ -85,8 +88,8 @@ def listaCharsADistFrec(listaChar: List[Char]): List[(Char, Int)] =
   def lAux(listaChar: List[Char], lista: List[(Char,Int)]): List[(Char,Int)] = listaChar match
     case Nil => lista
     case _ =>
-      val tupla: (Char,Int) = (listaChar.head,contar(listaChar,listaChar.head))
-      val listatemp: List[(Char,Int)]= List(tupla)
+      val tupla: (Char,Int) = (listaChar.head,contar(listaChar,listaChar.head)) // te produce una tupla con el carácter y las veces que aparece
+      val listatemp: List[(Char,Int)]= List(tupla) // te hace una lista con las tuplas
       lAux(listaChar.filter( _ != listaChar.head), lista ++ listatemp)
       //El filter lo hemos dado en teoria asi que supongo que se podra usar
   lAux(listaChar,List())
@@ -100,8 +103,10 @@ def DistribFrecAListaHojas(frec:List[(Char, Int)]): List[HojaHuffman] =
     case (letra, peso)::tail => DistribFrecAListaHojasAux(tail, HojaHuffman(letra, peso)::listtemp)
   DistribFrecAListaHojasAux(frec, List())
 
+//ordena la lista de hojas que le das por pesos
 def ordenar(lista: List[HojaHuffman]): List[HojaHuffman] =
-  
+
+  //Busca dentro de la lista que le das los pesos para poner el carácter en su sitio
   def insertar(h: HojaHuffman, lista: List[HojaHuffman], listtemp: List[HojaHuffman]): List[HojaHuffman] = lista match
     case Nil => listtemp
     case _ if (h.peso < lista.head.peso) =>
@@ -118,7 +123,7 @@ def ordenar(lista: List[HojaHuffman]): List[HojaHuffman] =
 
   ordenarAux(lista, List())
   
-
+//te cambia la lista que le das a una lista de carácteres
 def cadenaAListaChars(cadena: String): List [Char] =
   @tailrec
   def cAux(cadena: String, l: List[Char]): List[Char] = cadena match
@@ -127,6 +132,7 @@ def cadenaAListaChars(cadena: String): List [Char] =
 
   cAux(cadena,List())
 
+// te transforma una lista de carácteres en una cadena
 def listaCharsACadena(listaCar: List[Char]): String =
   val lista: List[Char] = listaCar.reverse
   @tailrec
@@ -136,6 +142,7 @@ def listaCharsACadena(listaCar: List[Char]): String =
 
   lAux(lista, "")
 
+// te crea el ArbolHuffman con la ayuda de las anteriores funciones
 def crearArbolHuffman(cadena: String): ArbolHuffman =
   val listaHojas: List[HojaHuffman] = DistribFrecAListaHojas(listaCharsADistFrec(cadenaAListaChars(cadena)))
   repetirHasta(combinar, esListaSingleton)(listaHojas)
@@ -154,12 +161,15 @@ object ArbolHuffman
 //constructor para clases abstractas
 
   def apply(cadena: String): ArbolHuffman = crearArbolHuffman(cadena)
+
+  //te transforma un árbol en una lista de tuplas con sus carácteres y su frecuencia
   def deArbolATabla(arbol: ArbolHuffman): TablaCodigos =
     def deArbolATablaAux(arbol: ArbolHuffman, listabits: List[Bit]): TablaCodigos = arbol match
       case HojaHuffman(letra,_) => List((letra, listabits.reverse))
       case RamaHuffman(izq, dcha) => deArbolATablaAux(izq, 0::listabits)++deArbolATablaAux(dcha, 1::listabits)
     deArbolATablaAux(arbol,List())
 
+  //te transforma un string en un lista de bits con la ayuda de una lista de tuplas con sus carácteres y su frecuencia
   def codificar(tabla: TablaCodigos)(cadena: String): List[Bit]=
     val listachars = cadenaAListaChars(cadena)
     def deCharABits(caracter: Char): List[Bit] =
@@ -174,32 +184,39 @@ object ArbolHuffman
       case head::tail => codificarAux(tabla,deCharABits(head)++listabits)(tail)
     codificarAux(tabla,List())(listachars)
 
+  //te transforma una lista de bits en un string con la ayuda de una lista de tuplas con sus carácteres y su frecuencia
   def decodificar(tabla: TablaCodigos)(listabits: List[Bit]): String =
-    def deBitsAChar(listabits: List[Bit]): Char =
+    //te cambia la lista de bits por la lista de tuplas con carácteres y la lista bits usados
+    def deBitsAChar(listabits: List[Bit]): (Char, List[Bit]) =
       def contienebits(lbitstabla: List[Bit], lbits: List[Bit]): Boolean = (lbitstabla, lbits) match
         case (Nil, _) => true
-        case (ltablahead::ltablatail, lbitshead::lbitstail)::_ if ltablahead == lbitshead => contienebits(ltablatail, lbitstail)
+        case (_, Nil) => false
+        case (ltablahead::ltablatail, lbitshead::lbitstail) if ltablahead == lbitshead => contienebits(ltablatail, lbitstail)
         //no se porque lo de arriba da error
         case _ => false
-
-      def deBitsACharAux(tablaCodigos: TablaCodigos): Char = tabla match
-        case (char, bits)::_ if contienebits(bits, listabits) => char
-        case head::tail => deBitsACharAux(tail)
+      @tailrec
+      def deBitsACharAux(tablaCodigos: TablaCodigos): (Char, List[Bit]) = tablaCodigos match
+        case (char, bits)::tail if contienebits(bits, listabits) => (char,bits)
+        case _::tail => deBitsACharAux(tail)
+        case Nil => throw new NoSuchElementException("No existe")
 
       deBitsACharAux(tabla)
+    // quita los bits que ya se han usado
+    def quitarbits(lbits1: List[Bit], lbits2: List[Bit]): List[Bit] =
+       @tailrec
+       def quitarbitsAux(lbits1: List[Bit], lbits2: List[Bit]): List[Bit] = (lbits1, lbits2) match
+         case (Nil,_) => lbits2
+         case (_,Nil) => Nil
+         case (head1::tail1, head2::tail2) if (head1 == head2) => quitarbitsAux(tail1,tail2)
+         case _ => lbits2
+       quitarbitsAux(lbits1,lbits2)
 
+    @tailrec
     def decodificarAux(cadenatemp: String, listatemp: List[Bit]): String = listatemp match
       case Nil => cadenatemp
       case _ =>
         val (char, bitsusados) = deBitsAChar(listatemp)
-        decodificarAux(cadenatemp+char, quitarbits(bitsusados, listatemp))
-        
-      def quitarbits(lbits1: List[Bit], lbits2: List[Bit]): List[Bit] =
-        @tailrec
-        def quitarbitsAux(lbits1: List[Bit], lbits2: List[Bit], listtemp: List[Bit]): List[Bit] = (lbits1, lbits2) match
-          case (Nil,_) => listtemp
-          case (head1::tail1, head2::tail2) => quitarbitsAux(tail1,tail2, tail2)
-        quitarbitsAux(lbits1,lbits2, lbits2)  
+        decodificarAux(cadenatemp + char, quitarbits(bitsusados, listatemp))
 
     decodificarAux("",listabits)
 
@@ -235,6 +252,7 @@ def main():Unit =
   val tabla = deArbolATabla(arbolHuffman)
   val mensaje = "sos eso"
   println(codificar(tabla)(mensaje))
+  println(decodificar(tabla)(List(1,1,0,0,1,1,0,1,1,1,1,0,0,1,0)))
 
 
 
