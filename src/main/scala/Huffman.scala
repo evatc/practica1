@@ -252,7 +252,11 @@ def main():Unit =
   val tabla = deArbolATabla(arbolHuffman)
   val mensaje = "sos eso"
   println(codificar(tabla)(mensaje))
-  println(decodificar(tabla)(List(0,1,0,0,1,1,1,1,1,0,0,1,0)))
+  println(decodificar(tabla)(List(0,1,0,0,1,1,1,1,1,1,0,0,1,0)))
+  val miarbol = crearArbolHuffman("this is an example of a huffman tree")
+  println(deArbolATabla(miarbol))
+
+
 
 
 
