@@ -18,31 +18,31 @@ abstract class ArbolHuffman {
   def decodificar(bits: List[Bit]): String =
     @tailrec
     def decodificarAux(bits: List[Bit], arbol: ArbolHuffman, cadenatemp: String): String = (bits, arbol) match
-      case (Nil, HojaHuffman(letra, n)) => cadenatemp + letra
-      case (Nil, _) => cadenatemp
-      case (0 :: tail, RamaHuffman(izq, _)) => decodificarAux(tail, izq, cadenatemp)
-      case (1 :: tail, RamaHuffman(_, dcha)) => decodificarAux(tail, dcha, cadenatemp)
-      case (listabits, HojaHuffman(letra, n)) => decodificarAux(listabits, this, cadenatemp + letra)
+      case (Nil, HojaHuffman(letra, n)) => cadenatemp + letra //Cuando la lista de bits se termina en una hoja añadimos el caracter y ya hemos terminado
+      case (0 :: tail, RamaHuffman(izq, _)) => decodificarAux(tail, izq, cadenatemp) //Si hay un 0 sigue decodificando la rama izquierda
+      case (1 :: tail, RamaHuffman(_, dcha)) => decodificarAux(tail, dcha, cadenatemp) //Si hay un 1 sigue decodificando la rama derecha
+      case (listabits, HojaHuffman(letra, n)) => decodificarAux(listabits, this, cadenatemp + letra) //Si hay una hoja añade su letra y continua decodifindo
+      case _ => throw new NoSuchElementException("La lista de bits no pertenece al árbol")
 
     decodificarAux(bits, this, "")
 
   // Te dice si el carácter que estás buscando está en el árbol
   def contiene(caracter: Char): Boolean =
     def contieneAux(arbol: ArbolHuffman, caracter: Char): Boolean = arbol match
-      case HojaHuffman(letra, p) => letra == caracter
-      case RamaHuffman(nodoizq, nododch) => contieneAux(nodoizq, caracter) || contieneAux(nododch, caracter)
+      case HojaHuffman(letra, p) => letra == caracter //Si hay una hoja se compara su caracter
+      case RamaHuffman(nodoizq, nododch) => contieneAux(nodoizq, caracter) || contieneAux(nododch, caracter) //Si hay una rama se va por ambos lados hasta llegar a una hoja
     contieneAux(this, caracter)
 
   // Devuelve la lista de bits q se forma con el string que metes
   def codificar(cadena: String): List[Bit]=
-    val listachar: List[Char] = cadenaAListaChars(cadena)
+    val listachar: List[Char] = cadenaAListaChars(cadena) //Creamos una lista  de caracteres a partir de la cadena
     @tailrec
     def codificarAux(listachar: List[Char], listtemp: List[Bit], arbol: ArbolHuffman): List[Bit] =  (listachar, arbol) match
-      case (Nil, _) => listtemp.reverse
-      case (head::tail, HojaHuffman(letra, _)) if (head == letra)=> codificarAux(tail, listtemp, this)
-      case (head::tail, RamaHuffman(nodoizq, nododch)) if nodoizq.contiene(head) => codificarAux(listachar, 0::listtemp, nodoizq)
-      case (head::tail, RamaHuffman(nodoizq, nododch)) if nododch.contiene(head) => codificarAux(listachar, 1::listtemp, nododch)
-      case (_,_) => throw new Error("Algún caracter de tu cadena no está en el árbol")
+      case (Nil, _) => listtemp.reverse //Cuando hayamos recorrido toda  la lista de caracteres terminamos
+      case (head::tail, HojaHuffman(letra, _)) if head == letra => codificarAux(tail, listtemp, this) //Cuando lleguemos a una hoja pasamos a codificar el siguiente caracter
+      case (head::tail, RamaHuffman(nodoizq, _)) if nodoizq.contiene(head) => codificarAux(listachar, 0::listtemp, nodoizq) //Si el caracter esta en la izquierda añadimos un 0 a la lista de bis y continuamos con la rama izquierda
+      case (head::tail, RamaHuffman(_, nododch)) if nododch.contiene(head) => codificarAux(listachar, 1::listtemp, nododch) //Si el caracter esta en la derecha añadimos un 1 a la lista de bis y continuamos con la rama derecha
+      case (_,_) => throw new Error("Algún caracter de la cadena no está en el árbol")
     codificarAux(listachar, List(), this)
   
 }
@@ -69,7 +69,7 @@ def listaCharsACadena(listaCar: List[Char]): String =
 
 // Convierte una lista de caracteres en su distribución de frecuencias.
 def listaCharsADistFrec(listaChar: List[Char]): List[(Char, Int)] =
-  //saber cuantas veces está un caracter dentro de una cadena
+  //cuenta cuantas veces está un caracter dentro de una cadena
   def contar(lista: List[Char], char: Char): Int =
     @tailrec
     def cAux(lista: List[Char], n: Int, char: Char): Int = lista match
@@ -92,8 +92,8 @@ def listaCharsADistFrec(listaChar: List[Char]): List[(Char, Int)] =
 def DistribFrecAListaHojas(frec:List[(Char, Int)]): List[HojaHuffman] =
   @tailrec
   def DistribFrecAListaHojasAux(frec:List[(Char, Int)], listtemp:List[HojaHuffman]): List[HojaHuffman] = frec match
-    case Nil => ordenar(listtemp)
-    case (letra, peso)::tail => DistribFrecAListaHojasAux(tail, HojaHuffman(letra, peso)::listtemp)
+    case Nil => ordenar(listtemp) //Cuando terminas la lista de frecuencias te devuelve la lista de hojas ordenada
+    case (letra, peso)::tail => DistribFrecAListaHojasAux(tail, HojaHuffman(letra, peso)::listtemp) //Añade la hoja a la lista y sigue rrecorriendo la lista de frecuencias
   DistribFrecAListaHojasAux(frec, List())
 
 //ordena la lista de hojas que le das por pesos
@@ -126,11 +126,11 @@ def crearArbolHuffman(cadena: String): ArbolHuffman =
 def creaRamaHuff(izq: ArbolHuffman, dch: ArbolHuffman): RamaHuffman =
   RamaHuffman(izq, dch)
 
-//te devuelve verdadero si la lista es igual a uno
+//Devuelve verdadero si la lista es igual a uno
 def esListaSingleton(lista: List[ArbolHuffman]): Boolean =
   lista.length == 1
 
-//te va creando las ramas en función del peso que tienen las hojas
+//Va creando las ramas en función del peso que tienen las hojas
 def combinar(nodos: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
   case izq::dcha::tail => (creaRamaHuff(izq, dcha)::tail)
   case _ => ordenarpeso(nodos)
@@ -145,7 +145,7 @@ def combinar(nodos: List[ArbolHuffman]): List[ArbolHuffman] = nodos match
     ordenarpAux(lista.tail, List(lista.head))
 
 def repetirHasta(combinar: List[ArbolHuffman] => List[ArbolHuffman], esListaSingleton: List[ArbolHuffman] => Boolean)(listaHojas: List[ArbolHuffman]): ArbolHuffman =
-  if esListaSingleton(listaHojas) then listaHojas.head
+  if esListaSingleton(listaHojas) then listaHojas.head //Si solo queda un arbol  termonamos
   else repetirHasta(combinar, esListaSingleton)(combinar(listaHojas))
 
 
@@ -159,66 +159,67 @@ case class HojaHuffman(letra: Char, p: Int) extends ArbolHuffman{
 
 object ArbolHuffman
 //constructor para clases abstractas
-
   def apply(cadena: String): ArbolHuffman = crearArbolHuffman(cadena)
 
-  // Transforma un árbol en una lista de tuplas con sus carácteres y sus bits
-  def deArbolATabla(arbol: ArbolHuffman): TablaCodigos =
-    def deArbolATablaAux(arbol: ArbolHuffman, listabits: List[Bit]): TablaCodigos = arbol match
-      case HojaHuffman(letra,_) => List((letra, listabits.reverse))
-      case RamaHuffman(izq, dcha) => deArbolATablaAux(izq, 0::listabits)++deArbolATablaAux(dcha, 1::listabits)
-    deArbolATablaAux(arbol,List())
 
-  // Transforma un string en un lista de bits con la ayuda de una lista de tuplas con sus carácteres y sus bits
-  def codificar(tabla: TablaCodigos)(cadena: String): List[Bit]=
-    val listachars = cadenaAListaChars(cadena)
-    def deCharABits(caracter: Char): List[Bit] =
-      @tailrec
-      def deCharABitsAux(tabla: TablaCodigos, caracter: Char): List[Bit] = tabla match
-        case (char, listabits)::_ if char == caracter => listabits.reverse
-        case _::tail => deCharABitsAux(tail,caracter)
-        case _ => throw new Error("El caracter no esta en la tabla")
-      deCharABitsAux(tabla, caracter)
+// Transforma un árbol en una lista de tuplas con sus carácteres y sus bits
+def deArbolATabla(arbol: ArbolHuffman): TablaCodigos =
+  def deArbolATablaAux(arbol: ArbolHuffman, listabits: List[Bit]): TablaCodigos = arbol match
+    case HojaHuffman(letra,_) => List((letra, listabits.reverse)) //Si hay una hoja te devuelve su letra con lista de bits
+    case RamaHuffman(izq, dcha) => deArbolATablaAux(izq, 0::listabits)++deArbolATablaAux(dcha, 1::listabits)
+  deArbolATablaAux(arbol,List())
+
+// Transforma un string en un lista de bits con la ayuda de una lista de tuplas con sus carácteres y sus bits
+def codificar(tabla: TablaCodigos)(cadena: String): List[Bit]=
+  val listachars = cadenaAListaChars(cadena) //Creamos una lista  de caracteres a partir de la cadena
+  //Dice la lista de bits de un caracter
+  def deCharABits(caracter: Char): List[Bit] =
     @tailrec
-    def codificarAux(tabla: TablaCodigos, listabits: List[Bit])(cadena: List[Char]): List[Bit]= cadena match
-      case Nil => listabits.reverse
-      case head::tail => codificarAux(tabla,deCharABits(head)++listabits)(tail)
-    codificarAux(tabla,List())(listachars)
+    def deCharABitsAux(tabla: TablaCodigos, caracter: Char): List[Bit] = tabla match
+      case (char, listabits)::_ if char == caracter => listabits.reverse //Si el caracter de un elemento de la tabla coincide con el caracter dado te devuelve su lista de bits
+      case _::tail => deCharABitsAux(tail,caracter) //Si no coincide sigue reccorriendo la lista
+      case _ => throw new Error("El caracter no esta en la tabla")
+    deCharABitsAux(tabla, caracter)
+  @tailrec
+  def codificarAux(tabla: TablaCodigos, listabits: List[Bit])(cadena: List[Char]): List[Bit]= cadena match
+    case Nil => listabits.reverse //Si ya hemos rrecorrido toda la tabla terminamos
+    case head::tail => codificarAux(tabla,deCharABits(head)++listabits)(tail) //Vamos cogiendo la lista de bits de cada elemento de la tabla
+  codificarAux(tabla,List())(listachars)
 
-  // Transforma una lista de bits en un string con la ayuda de una lista de tuplas con sus carácteres y su frecuencia
-  def decodificar(tabla: TablaCodigos)(listabits: List[Bit]): String =
-    //te cambia la lista de bits por la lista de tuplas con carácteres y la lista bits usados
-    def deBitsAChar(listabits: List[Bit]): (Char, List[Bit]) =
-      def contienebits(lbitstabla: List[Bit], lbits: List[Bit]): Boolean = (lbitstabla, lbits) match
-        case (Nil, _) => true
-        case (_, Nil) => false
-        case (ltablahead::ltablatail, lbitshead::lbitstail) if ltablahead == lbitshead => contienebits(ltablatail, lbitstail)
-        case _ => false
-      @tailrec
-      def deBitsACharAux(tablaCodigos: TablaCodigos): (Char, List[Bit]) = tablaCodigos match
-        case (char, bits)::tail if contienebits(bits, listabits) => (char,bits)
-        case _::tail => deBitsACharAux(tail)
-        case Nil => throw new NoSuchElementException("No existe")
-
-      deBitsACharAux(tabla)
-    // quita los bits que ya se han usado
-    def quitarbits(lbits1: List[Bit], lbits2: List[Bit]): List[Bit] =
-       @tailrec
-       def quitarbitsAux(lbits1: List[Bit], lbits2: List[Bit]): List[Bit] = (lbits1, lbits2) match
-         case (Nil,_) => lbits2
-         case (_,Nil) => Nil
-         case (head1::tail1, head2::tail2) if (head1 == head2) => quitarbitsAux(tail1,tail2)
-         case _ => lbits2
-       quitarbitsAux(lbits1,lbits2)
-
+// Transforma una lista de bits en un string con la ayuda de una lista de tuplas con sus carácteres y su frecuencia
+def decodificar(tabla: TablaCodigos)(listabits: List[Bit]): String =
+  //Cambia la lista de bits por la lista de tuplas con carácteres y la lista bits usados
+  def deBitsAChar(listabits: List[Bit]): (Char, List[Bit]) =
+    //Devuelve true si la lista de bits de un elemento de la tabla coincide con el principio de otra lista de bits
+    def contienebits(lbitstabla: List[Bit], lbits: List[Bit]): Boolean = (lbitstabla, lbits) match
+      case (Nil, _) => true //Si ya hemos recorrido la lista de bits del elemento de la tabla es true
+      case (_, Nil) => false //Si se acaba antes la lista de bits general es false
+      case (ltablahead::ltablatail, lbitshead::lbitstail) if ltablahead == lbitshead => contienebits(ltablatail, lbitstail) //Si el primer numero coincide con el primer numero de la otra lista seguimos recorriendo las listas
+      case _ => false
     @tailrec
-    def decodificarAux(cadenatemp: String, listatemp: List[Bit]): String = listatemp match
-      case Nil => cadenatemp
-      case _ =>
-        val (char, bitsusados) = deBitsAChar(listatemp)
-        decodificarAux(cadenatemp + char, quitarbits(bitsusados, listatemp))
+    def deBitsACharAux(tablaCodigos: TablaCodigos): (Char, List[Bit]) = tablaCodigos match
+      case (char, bits)::tail if contienebits(bits, listabits) => (char,bits) //Si contienebits es verdadero te devuelve ese elemento de la tabla
+      case Nil => throw new NoSuchElementException("No existe") //Si ya hemos recorrido toda la tabla y no hay ninguna coincidencia es que la lista de bits no pertenece a la tabla
+      case _::tail => deBitsACharAux(tail) //Si no es verdadero sigue recorriendo la tabla
 
-    decodificarAux("",listabits)
+    deBitsACharAux(tabla)
+  // quita los bits que ya se han usado
+  def quitarbits(bitsquequito: List[Bit], bitstotales: List[Bit]): List[Bit] =
+    @tailrec
+    def quitarbitsAux(bitsquequito: List[Bit], bitstotales: List[Bit]): List[Bit] = (bitsquequito, bitstotales) match
+      case (Nil,_) => bitstotales
+      case (head1::tail1, head2::tail2) if (head1 == head2) => quitarbitsAux(tail1,tail2)
+      case _ => throw new Error()
+    quitarbitsAux(bitsquequito,bitstotales)
+
+  @tailrec
+  def decodificarAux(cadenatemp: String, listatemp: List[Bit]): String = listatemp match
+    case Nil => cadenatemp
+    case _ =>
+      val (char, bitsusados) = deBitsAChar(listatemp)
+      decodificarAux(cadenatemp + char, quitarbits(bitsusados, listatemp))
+
+  decodificarAux("",listabits)  
 
 
 
@@ -253,10 +254,7 @@ def main():Unit =
   val mensaje = "sos eso"
   println(codificar(tabla)(mensaje))
   println(decodificar(tabla)(List(0,1,0,0,1,1,1,1,1,1,0,0,1,0)))
-  val miarbol = crearArbolHuffman("this is an example of a huffman tree")
-  println(deArbolATabla(miarbol))
-
-
+  println(deArbolATabla(arbolHuffman))
 
 
 
